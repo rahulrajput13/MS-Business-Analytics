@@ -1,0 +1,543 @@
+---
+title: "Homework Assignment 2 for Rahul Rajput"
+author: "Rahul Rajput"
+date: "2022-08-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+library("dplyr")
+### Answer 1 ###
+
+# Discrete variable
+
+#Parta
+set.seed(7)
+wheel = c(0:1000)
+
+theor_mean = mean(wheel)
+theor_var = sum((wheel-theor_mean)^2)/length(wheel)
+theor_sd = sqrt(theor_var)
+
+theor_mean
+theor_sd
+
+#Partb
+# using a combination of 'replicate' and 'sample' functions to run the simulations
+
+#Simulating 1 spin
+wheel_spin1 = replicate(1000,{
+  samp = sample(wheel,1,replace=TRUE)
+})
+matrix_wheel_spin1 = matrix(wheel_spin1, nrow=1)
+matrix_wheel_spin1 = t(matrix_wheel_spin1)
+#matrix_wheel_spin1
+
+samp_means1 = rowMeans(matrix_wheel_spin1)
+#samp_means1
+#matrix_wheel_spin1 = cbind(matrix_wheel_spin1,samp_means1)
+#matrix_wheel_spin1
+
+sample_mean_mean1 = mean(samp_means1)
+sample_mean_mean1
+
+stdev_sample_mean1 = sd(samp_means1)
+stdev_sample_mean1
+
+hist(wheel_spin1)
+
+std_error1 = theor_sd/sqrt(1)
+std_error1
+
+prob_600_1 = sum(samp_means1>600)/length(wheel)
+prob_600_1
+
+col1 = c(theor_mean,sample_mean_mean1,std_error1,stdev_sample_mean1,prob_600_1)
+col1
+
+#Simulating 2 spin
+wheel_spin2 = replicate(1000,{
+  samp = sample(wheel,2,replace=TRUE)
+})
+matrix_wheel_spin2 = matrix(wheel_spin2, nrow=2)
+matrix_wheel_spin2 = t(matrix_wheel_spin2)
+#matrix_wheel_spin2
+
+samp_means2 = rowMeans(matrix_wheel_spin2)
+#samp_means2
+
+sample_mean_mean2 = mean(samp_means2)
+sample_mean_mean2
+
+stdev_sample_mean2 = sd(samp_means2)
+stdev_sample_mean2
+
+hist(samp_means2)
+
+std_error2 = theor_sd/sqrt(2)
+std_error2
+
+prob_600_2 = sum(samp_means2>600)/length(wheel)
+prob_600_2
+
+col2 = c(theor_mean,sample_mean_mean2,std_error2,stdev_sample_mean2,prob_600_2)
+col2
+
+#Simulating 3 spin
+wheel_spin3 = replicate(1000,{
+  samp = sample(wheel,3,replace=TRUE)
+})
+matrix_wheel_spin3 = matrix(wheel_spin3, nrow=3)
+matrix_wheel_spin3 = t(matrix_wheel_spin3)
+
+samp_means3 = rowMeans(matrix_wheel_spin3)
+
+sample_mean_mean3 = mean(samp_means3)
+
+stdev_sample_mean3 = sd(samp_means3)
+
+hist(samp_means3)
+
+std_error3 = theor_sd/sqrt(3)
+
+prob_600_3 = sum(samp_means3>600)/length(wheel)
+
+col3 = c(theor_mean,sample_mean_mean3,std_error3,stdev_sample_mean3,prob_600_3)
+col3
+
+#Simulating 4 spin
+wheel_spin4 = replicate(1000,{
+  samp = sample(wheel,4,replace=TRUE)
+})
+matrix_wheel_spin4 = matrix(wheel_spin4, nrow=4)
+matrix_wheel_spin4 = t(matrix_wheel_spin4)
+#matrix_wheel_spin4
+
+samp_means4 = rowMeans(matrix_wheel_spin4)
+#samp_means4
+
+sample_mean_mean4 = mean(samp_means4)
+
+stdev_sample_mean4 = sd(samp_means4)
+
+hist(samp_means4)
+
+std_error4 = theor_sd/sqrt(4)
+
+prob_600_4 = sum(samp_means4>600)/length(wheel)
+
+col4 = c(theor_mean,sample_mean_mean4,std_error4,stdev_sample_mean4,prob_600_4)
+col4
+
+#Simulating 5 spin
+wheel_spin5 = replicate(1000,{
+  samp = sample(wheel,5,replace=TRUE)
+})
+matrix_wheel_spin5 = matrix(wheel_spin5, nrow=5)
+matrix_wheel_spin5 = t(matrix_wheel_spin5)
+
+samp_means5 = rowMeans(matrix_wheel_spin5)
+
+sample_mean_mean5 = mean(samp_means5)
+
+stdev_sample_mean5 = sd(samp_means5)
+
+hist(samp_means5)
+
+std_error5 = theor_sd/sqrt(5)
+
+prob_600_5 = sum(samp_means5>600)/length(wheel)
+
+col5 = c(theor_mean,sample_mean_mean5,std_error5,stdev_sample_mean5,prob_600_5)
+col5
+
+#Simulating 6 spin
+wheel_spin6 = replicate(1000,{
+  samp = sample(wheel,6,replace=TRUE)
+})
+matrix_wheel_spin6 = matrix(wheel_spin6, nrow=6)
+matrix_wheel_spin6 = t(matrix_wheel_spin6)
+
+samp_means6 = rowMeans(matrix_wheel_spin6)
+
+sample_mean_mean6 = mean(samp_means6)
+
+stdev_sample_mean6 = sd(samp_means6)
+
+hist(samp_means6)
+
+std_error6 = theor_sd/sqrt(6)
+
+prob_600_6 = sum(samp_means6>600)/length(wheel)
+
+col6 = c(theor_mean,sample_mean_mean6,std_error6,stdev_sample_mean6,prob_600_6)
+col6
+
+#Simulating 7 spin
+wheel_spin7 = replicate(1000,{
+  samp = sample(wheel,7,replace=TRUE)
+})
+matrix_wheel_spin7 = matrix(wheel_spin7, nrow=7)
+matrix_wheel_spin7 = t(matrix_wheel_spin7)
+
+samp_means7 = rowMeans(matrix_wheel_spin7)
+
+sample_mean_mean7 = mean(samp_means7)
+
+stdev_sample_mean7 = sd(samp_means7)
+
+hist(samp_means7)
+
+std_error7 = theor_sd/sqrt(7)
+
+prob_600_7 = sum(samp_means7>600)/length(wheel)
+
+col7 = c(theor_mean,sample_mean_mean7,std_error7,stdev_sample_mean7,prob_600_7)
+col7
+
+#Simulating 8 spin
+wheel_spin8 = replicate(1000,{
+  samp = sample(wheel,8,replace=TRUE)
+})
+matrix_wheel_spin8 = matrix(wheel_spin8, nrow=8)
+matrix_wheel_spin8 = t(matrix_wheel_spin8)
+
+samp_means8 = rowMeans(matrix_wheel_spin8)
+
+sample_mean_mean8 = mean(samp_means8)
+
+stdev_sample_mean8 = sd(samp_means8)
+
+hist(samp_means8)
+
+std_error8 = theor_sd/sqrt(8)
+
+prob_600_8 = sum(samp_means8>600)/length(wheel)
+
+col8 = c(theor_mean,sample_mean_mean8,std_error8,stdev_sample_mean8,prob_600_8)
+col8
+
+#Simulating 9 spin
+wheel_spin9 = replicate(1000,{
+  samp = sample(wheel,9,replace=TRUE)
+})
+matrix_wheel_spin9 = matrix(wheel_spin9, nrow=9)
+matrix_wheel_spin9 = t(matrix_wheel_spin9)
+
+samp_means9 = rowMeans(matrix_wheel_spin9)
+
+sample_mean_mean9 = mean(samp_means9)
+
+stdev_sample_mean9 = sd(samp_means9)
+
+hist(samp_means9)
+
+std_error9 = theor_sd/sqrt(9)
+
+prob_600_9 = sum(samp_means9>600)/length(wheel)
+
+col9 = c(theor_mean,sample_mean_mean9,std_error9,stdev_sample_mean9,prob_600_9)
+col9
+
+#Simulating 10 spin
+wheel_spin10 = replicate(1000,{
+  samp = sample(wheel,10,replace=TRUE)
+})
+matrix_wheel_spin10 = matrix(wheel_spin10, nrow=10)
+matrix_wheel_spin10 = t(matrix_wheel_spin10)
+
+samp_means10 = rowMeans(matrix_wheel_spin10)
+
+sample_mean_mean10 = mean(samp_means10)
+
+stdev_sample_mean10 = sd(samp_means10)
+
+hist(samp_means10)
+
+std_error10 = theor_sd/sqrt(10)
+
+prob_600_10 = sum(samp_means10>600)/length(wheel)
+
+col10 = c(theor_mean,sample_mean_mean10,std_error10,stdev_sample_mean10,prob_600_10)
+col10
+
+#Final Table
+final = cbind(col1,col2,col3,col4,col5,col6,col7,col8,col9,col10)
+
+rownames(final) = c("Theoretical Mean","Mean of Sample Means","Theoretical Standard Error","Standard Deviation of Sample Means","P(winning > 600")
+
+final
+
+
+### Answer 2 ###
+
+supermarket = read.csv("SuperMarketTransactions.csv")
+#supermarket
+supermarket$Revenue<-gsub("\\$","",as.character(supermarket$Revenue))
+supermarket$Revenue = as.numeric(supermarket$Revenue)
+
+#Parta
+
+library(dplyr)
+revenuexprodfam = supermarket %>%
+  group_by(Product.Family) %>%
+  summarise(sum=sum(Revenue))
+
+countxprodfam = supermarket %>%
+  group_by(Product.Family) %>%
+  summarise(Transaction=n())
+
+summ = cbind(revenuexprodfam,countxprodfam$Transaction)
+summ
+
+sprintf("There are only 3 categories of Product Families which makes stratified sampling less complex. The data is further subdivided several times within these categories making an overall average for revenue less informative. To better understand consumer spending habits having a stratified sample will help. The Consumers will have different spending preferences for each of the three product families and this information will be lost if we sample all three categories as a whole. With a Simple Random Sample we can only understand what the average money is spent by a customer at the store is while we can understand what the avg customer spends on Food, Drinks. and Non-Consumables with stratified sampling")
+
+#partb
+numbersamples = (countxprodfam$Transaction*250)/sum(countxprodfam$Transaction)
+numbersamples
+
+sprintf("We would sample choose 22 samples for Drinks, 181 samples for Food, and 47 samples for Non-Consumables")
+
+#partc
+#Sampling Revenue for Drinks
+
+revenuedrink = supermarket$Revenue[which(supermarket$Product.Family=="Drink")]
+revenuefood = supermarket$Revenue[which(supermarket$Product.Family=="Food")]
+revenuenonconsumable = supermarket$Revenue[which(supermarket$Product.Family=="Non-Consumable")]
+
+revenuedrink_sample = sample(revenuedrink,22)
+revenuefood_sample = sample(revenuefood,181)
+revenuenonconsumable_sample = sample(revenuenonconsumable,47)
+
+revenuedrink_sample
+revenuefood_sample
+revenuenonconsumable_sample
+
+summarydrink = c(mean(revenuedrink_sample),sd(revenuedrink_sample))
+summaryfood = c(mean(revenuefood_sample),sd(revenuefood_sample))
+summarynonconsumable = c(mean(revenuenonconsumable_sample),sd(revenuenonconsumable_sample))
+
+summarytable = rbind(summarydrink,summaryfood,summarynonconsumable)
+colnames(summarytable) = c("Sample Mean","Sample Std Dev")
+rownames(summarytable) = c("Drink","Food","Non-Consumable")
+
+summarytable
+
+sprintf("The individual means and std deviations are quite similar for each of the three categories")
+
+
+### Answer 3 ###
+
+#electronic billing system for trucking co
+#old payment time = 39 days
+#industry standard time = 30 days
+
+#claim that mean payment time will reduce by more than 50%
+#therefore mean payment time must be less than 19.5 days
+
+#65 invoices randomly selected from population size of 7823
+#population std dev time = 4.2 days
+
+payment = read.csv("PaymentTimes.csv")
+#payment
+
+#parta
+# 95% confidence interval
+sample_size_payment = 65
+popn_stddev = 4.2
+z95 = qnorm(0.975, mean = 0, sd = 1, lower.tail = TRUE)
+samp_mean_payment = mean(payment$PayTime)
+
+lower_payment = samp_mean_payment - (z95*popn_stddev/sqrt(sample_size_payment))
+upper_payment = samp_mean_payment + (z95*popn_stddev/sqrt(sample_size_payment))
+
+sprintf("95 percent Confidence Interval: (%s, %s)", round(lower_payment), round(upper_payment))
+sprintf("The payment system is effective")
+
+#partb
+z99 = qnorm(0.995, mean = 0, sd = 1, lower.tail = TRUE)
+lower_payment99 = samp_mean_payment - (z99*popn_stddev/sqrt(sample_size_payment))
+upper_payment99 = samp_mean_payment + (z99*popn_stddev/sqrt(sample_size_payment))
+sprintf("99 percent Confidence Interval: (%s, %s)", lower_payment99, upper_payment99)
+sprintf("Yes we can be 99%% confident that the billing system is effective, i.e., the average payment time will be less than 19.5 days")
+
+#partc
+#prob of sample payment time less than 18.1077 days, therefore we want to consider the lower tail
+
+problower = pnorm(18.1077,19.5,4.2/sqrt(65),lower.tail = TRUE)
+problower
+
+sprintf("The probability of the payment time being less than 18.1077 days is extremely low at %s",problower)
+
+
+### Answer 4 ###
+
+#Exponential distribution, units in minutes
+tollmean = 2.7
+pexp(3,(1/2.7))
+
+sprintf("67%% of cars can pass through the toll booth in less than 3 minutes")
+
+
+### Answer 5 ###
+
+mean_race = 62
+stddev_race = 2
+
+#probability of finishing under 60 seconds twice for the next five races
+
+p_success = pnorm(60,62,2,lower.tail = TRUE)
+p_success
+
+sprintf("The probability that she will swim under one minute in the next 5 races is %s",dbinom(2,5,p_success))
+
+
+### Answer 6 ###
+
+# population approximated = 25
+# donations above 1000 = 5
+# donations less or equal to than 1000 = 20
+# sample size = 4
+
+#parta
+parta = dhyper(1,5,20,4)
+sprintf("The probability that exactly one of the 4 audited would have contributed more than 1000 dollars to charity is %s",parta)
+
+#partb
+partb = 1-phyper(0,5,20,4)
+sprintf("The probability that atleast one of the 4 audited would have contributed more than 1000 dollars to charity is %s",partb)
+
+
+### Answer 7 ###
+#poisson distribution with a mean of 3/day
+
+#parta
+sprintf("The probability that no Mercedes is sold on a particular day is %s",dpois(0,3))
+
+#partb
+p_atleastone = 1-dpois(0,3)
+p_atleastone
+
+#now applying binomial distribution, 5 trials
+sprintf("The probability that atleast one Mercedes is sold for 5 consecutive days is %s",dbinom(5,5,p_atleastone))
+
+### Answer 8 ###
+#Event occurs once every 0.5 minutes, exponential distribution mean
+
+#parta
+#median is the point where the number of values are divided exactly into 2. Therefore for the CDF, this is the point where the sum of the area (by integrating the PDF) must be excatly half
+med_alarm = qexp(0.50,0.5,lower.tail = TRUE)
+#med_alarm
+
+sprintf("median waiting time for alarm is %s minutes",med_alarm)
+
+#partb
+quart_alarm = qexp(0.25,0.5,lower.tail = TRUE)
+sprintf("first quartile for the waiting time of alarm is %s minutes",quart_alarm)
+
+#partc
+alarm_30 = qexp(0.30,0.5,lower.tail = TRUE)
+sprintf("30th percentile for the waiting time of alarm is %s minutes",alarm_30)
+
+log(4/3)*2
+
+### Answer 9 ###
+
+#prob of 110 responses out of 150 total
+#Probability calculation will be split into two groups, one for thos who respond in wave 1 and another for thos who respond in wave 2. Since we are splitting the population into two we will calculate the probabilities of success for each case and then add the two results together.
+ 
+prob_response = pbinom(109,150,(0.55+0.3*0.45),lower.tail = FALSE)
+sprintf("The probability of getting atleast 110 responses is %s",prob_response)
+
+### Answer 10 ###
+p_default = 0.07
+
+mean_charges = 350
+stddev_charges = 100
+
+#parta
+prob_baddebt_250 = 1-pnorm(250/0.8,350,100)
+#prob_baddebt_250
+
+sprintf("The probability of that a customer will default and produce a bad debt of more than 250 dollars is %s",prob_baddebt_250*0.07)
+
+#partb
+#group size = 500
+#mean = np
+#var = np(1-p)
+mean_defaulters = 500*(prob_baddebt_250*0.07)
+mean_defaulters
+
+stddev_defaulters = sqrt(500*(prob_baddebt_250*0.07)*(1-((prob_baddebt_250*0.07))))
+stddev_defaulters
+
+sprintf("The mean and std dev of the distribution of people who wil default with a bad debt over 250 dollars are %s and %s respectively",mean_defaulters,stddev_defaulters)
+
+#partc
+prob_partc = 1-pbinom(24,500,prob_baddebt_250*0.07)
+sprintf("Probability atleast 25 people will fit description in part a is %s",prob_partc)
+
+### Answer 11 ###
+# demand is a random variable
+
+#15000, 18000, 24000, 28000
+
+teddyprice = 24
+teddysurplusprice = 5
+teddycost = 16
+
+#parta
+#expected demand = 20000
+#95% CI between 10000 & 30000
+
+stddev_forecaster = 10000/qnorm(0.975)
+
+sprintf("The normal distribution of demand predicted by the forecaster can be described with a mean of %s, and a std dev of %s.",20000,round(stddev_forecaster))
+
+#partb
+
+prob_stockout = c(1-pnorm(15000,20000,stddev_forecaster),1-pnorm(18000,20000,stddev_forecaster),1-pnorm(24000,20000,stddev_forecaster),1-pnorm(28000,20000,stddev_forecaster))
+
+demands = c(15000,18000,24000,28000)
+
+stockout = cbind(demands,prob_stockout)
+stockout
+percent_prob = prob_stockout*100
+stockout = cbind(stockout,percent_prob)
+stockout
+
+#partc - table made in excel, uploaded separately
+
+sprintf("Ordering 24,000 and 28,000 units does not seeme to be a wise decision due to high volatility of profits between scenarios.")
+
+#partd
+
+sprintf("Based on the Manager's hope, the ideal amount to produce would be %s units. This scenario would entail profits of 130,500 dollars in the most likely case, 181,000 dollars in the optimistic case and a loss of 60,000 dollars in the pessimistic case. This seems to be a good order amount compared to other cases. One argument can be made for ordering 20000 units as the loss would only be 8000 dollars in the case of pessimistic sales and the profit in the most likely case would be higher",qnorm(0.7,20000,stddev_forecaster))
+
+
+
+```

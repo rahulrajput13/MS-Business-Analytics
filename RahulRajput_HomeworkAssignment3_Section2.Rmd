@@ -1,0 +1,831 @@
+---
+title: "RahulRajput_HomeworkAssignment3_Section2"
+author: "Rahul Rajput"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+### Answer 1 ###
+
+#One sample, right tailed, Hypothesis Testing
+#alpha = 0.02 
+#type 2 error - 10% = 0.1
+# z = (xbar-mu)/(sigma/root(n))
+# n = (z^2)*(sigma^2)/(xbar-mu)^2
+install.packages("pwr")
+stddev_batteries = 30
+mean_batteries = 385
+
+samplesize_batteries = ((qnorm(1-0.02)+qnorm(1-0.1))^2)*(stddev_batteries^2)/((385-400)^2)
+samplesize_batteries
+
+sprintf("The recommended sample size is 45")
+
+#using power.t.test
+
+power.t.test(n=NULL,delta=400-385,sig.level = 0.02,power = 0.90,type="one.sample",sd=stddev_batteries,alternative = "one.sided")
+
+library(pwr)
+pwr.t.test(n = NULL, d = (385-400)/30, 
+           sig.level = 0.02, 
+           power = 0.90, 
+           type = "one.sample", 
+           alternative = "less")
+
+sprintf("The recommended sample size is 47")
+```
+
+
+```{r}
+### Answer 2 ###
+
+waitingtime = read.csv("WaitingTimes.csv")
+
+sampsize_waitingtime = length(waitingtime$BankA)
+sampstddev_bankA = sd(waitingtime$BankA)
+sampstddev_bankB = sd(waitingtime$BankB)
+
+lowerbanksd = qchisq(0.025,sampsize_waitingtime-1,lower.tail = TRUE)
+upperbanksd = qchisq(0.025,sampsize_waitingtime-1,lower.tail = FALSE)
+
+lowerlimit_waitingtimeA = sqrt((sampsize_waitingtime-1)*(sampstddev_bankA^2)/upperbanksd)
+lowerlimit_waitingtimeB = sqrt((sampsize_waitingtime-1)*(sampstddev_bankB^2)/upperbanksd)
+
+upperlimit_waitingtimeA = sqrt((sampsize_waitingtime-1)*(sampstddev_bankA^2)/lowerbanksd)
+upperlimit_waitingtimeB = sqrt((sampsize_waitingtime-1)*(sampstddev_bankB^2)/lowerbanksd)
+
+sprintf("Confidence interval for standard deviation of waiting times for Bank A is %s : %s : %s",round(lowerlimit_waitingtimeA,digits = 2),round(sampstddev_bankA,digits = 2),round(upperlimit_waitingtimeA,digits = 2))
+sprintf("Confidence interval for standard deviation of waiting times for Bank B is %s : %s : %s",round(lowerlimit_waitingtimeB,digits = 2),round(sampstddev_bankB,digits = 2),round(upperlimit_waitingtimeB,digits = 2))
+
+sprintf("We are 95%% confident that the standard deviation (variation) of waiting times for Bank A us lower than that of Bank B")
+sprintf("We can infer that Bank A has a faster customer queuing system")
+```
+
+
+```{r}
+### Answer 3 ###
+
+#PartA
+#Estimating sample size
+
+samplesize_q3a = 0.5*0.5*(qnorm(0.975)/0.04)^2
+sprintf("The minimum sample size required would be %s",round(samplesize_q3a))
+
+#PartB
+samplesize_q3b = 0.35*0.65*(qnorm(0.975)/0.04)^2
+sprintf("The minimum sample size required would be %s",round(samplesize_q3b))
+
+#PartC
+sprintf("The minimum sample size required when we know the proportion is smaller than that required when we do not know. The value of 0.5*0.5 gives the largest value, and therefore the safest estimate for the minimum population size within a certain margin of error and confidence level")
+```
+
+
+```{r}
+
+### Answer 4 ###
+library(dplyr)
+williamson = read.csv("Admissions.csv")
+sampsize_williamson = 178
+
+#PartA
+
+williamsonparta = williamson %>%
+  filter(Accepted.our.offer=="Yes")
+
+propenrolled = sum(williamson$Accepted.our.offer=="Yes")/length(williamson$Accepted.our.offer)
+propenrolled*length(williamson$Accepted.our.offer)
+(1-propenrolled)*length(williamson$Accepted.our.offer)
+#conditions satisfied
+
+propenrolled_lower = propenrolled - qnorm(0.975)*sqrt(propenrolled*(1-propenrolled)/sampsize_williamson)
+propenrolled_upper = propenrolled + qnorm(0.975)*sqrt(propenrolled*(1-propenrolled)/sampsize_williamson)
+sprintf("The confidence interval for proportion of students who accepted Williamson's offer is %s : %s",round(propenrolled_lower,digits=2),round(propenrolled_upper,digits=2))
+
+prop330 = williamson %>%
+  filter(williamson$Combined.Score<330)
+
+propenrolled330 = sum(prop330$Accepted.our.offer=="Yes")/length(prop330$Accepted.our.offer)
+propenrolled330
+propenrolled330_lower = propenrolled330 - qnorm(0.975)*sqrt(propenrolled330*(1-propenrolled330)/length(prop330$Combined.Score))
+propenrolled330_upper = propenrolled330 + qnorm(0.975)*sqrt(propenrolled330*(1-propenrolled330)/length(prop330$Combined.Score))
+sprintf("The confidence interval for proportion of students who accepted Williamson's offer and have a combined score less than 330 is %s : %s",round(propenrolled330_lower,digits=2),round(propenrolled330_upper,digits=2))
+
+prop350 = williamson %>%
+  filter(williamson$Combined.Score>=330&williamson$Combined.Score<=375)
+
+propenrolled350 = sum(prop350$Accepted.our.offer=="Yes")/length(prop350$Accepted.our.offer)
+propenrolled350
+propenrolled350_lower = propenrolled350 - qnorm(0.975)*sqrt(propenrolled350*(1-propenrolled350)/length(prop350$Combined.Score))
+propenrolled350_upper = propenrolled350 + qnorm(0.975)*sqrt(propenrolled350*(1-propenrolled350)/length(prop350$Combined.Score))
+sprintf("The confidence interval for proportion of students who accepted Williamson's offer and have a combined score between 330 and 375 is %s : %s",round(propenrolled350_lower,digits=2),round(propenrolled350_upper,digits=2))
+
+prop375 = williamson %>%
+  filter(williamson$Combined.Score>375)
+
+propenrolled375 = sum(prop375$Accepted.our.offer=="Yes")/length(prop375$Accepted.our.offer)
+propenrolled375
+propenrolled375_lower = propenrolled375 - qnorm(0.975)*sqrt(propenrolled375*(1-propenrolled375)/length(prop375$Combined.Score))
+propenrolled375_upper = propenrolled375 + qnorm(0.975)*sqrt(propenrolled375*(1-propenrolled375)/length(prop375$Combined.Score))
+sprintf("The confidence interval for proportion of students who accepted Williamson's offer and have a combined score above 375 is %s : %s",round(propenrolled375_lower,digits=2),round(propenrolled375_upper,digits=2))
+
+#PartB
+median_combinedscore = median(williamson$Combined.Score)
+
+williamsonpartb = williamson %>%
+  filter(Went.to.main.rival=="Yes")
+
+prop_rival_less = sum(williamsonpartb$Combined.Score<median_combinedscore)/length(williamsonparta$Accepted.our.offer)
+prop_rival_less_lower = prop_rival_less - qnorm(0.975)*sqrt(prop_rival_less*(1-prop_rival_less)/length(williamsonparta$Accepted.our.offer))
+prop_rival_less_upper = prop_rival_less + qnorm(0.975)*sqrt(prop_rival_less*(1-prop_rival_less)/length(williamsonparta$Accepted.our.offer))
+sprintf("The 95%% confidence interval for Acceptable students, with a combined score lower than the median, who choose to go to the rival school is %s : %s",round(prop_rival_less_lower,digits=2),round(prop_rival_less_upper,digits=2))
+
+prop_rival_more = sum(williamsonpartb$Combined.Score>=median_combinedscore)/length(williamsonparta$Accepted.our.offer)
+prop_rival_more_lower = prop_rival_more - qnorm(0.975)*sqrt(prop_rival_more*(1-prop_rival_more)/length(williamsonparta$Accepted.our.offer))
+prop_rival_more_upper = prop_rival_more + qnorm(0.975)*sqrt(prop_rival_more*(1-prop_rival_more)/length(williamsonparta$Accepted.our.offer))
+sprintf("The 95%% confidence interval for Acceptable students, with a combined score greater than the median, who choose to go to the rival school is %s : %s",round(prop_rival_more_lower,digits=2),round(prop_rival_more_upper,digits=2))
+
+
+#PartC
+t95 <- qt(0.975, df = length(williamsonparta$Combined.Score) - 1, lower.tail = TRUE)
+
+mean_enrolled_combinedscore = mean(williamsonparta$Combined.Score)
+mean_enrolled_combinedscore_lower = mean_enrolled_combinedscore - t95*sd(williamsonparta$Combined.Score)/sqrt(length(williamsonparta$Combined.Score))
+mean_enrolled_combinedscore_upper = mean_enrolled_combinedscore + t95*sd(williamsonparta$Combined.Score)/sqrt(length(williamsonparta$Combined.Score))
+sprintf("The 95%% Confidence Interval for the mean combined score of students who accepted Williamson's offer to enroll is %s : %s",round(mean_enrolled_combinedscore_lower,digits=2),round(mean_enrolled_combinedscore_upper,digits=2))
+
+mean_enrolled_gpa = mean(williamsonparta$HS.GPA)
+mean_enrolled_gpa_lower = mean_enrolled_gpa - t95*sd(williamsonparta$HS.GPA)/sqrt(length(williamsonparta$HS.GPA))
+mean_enrolled_gpa_upper = mean_enrolled_gpa + t95*sd(williamsonparta$HS.GPA)/sqrt(length(williamsonparta$HS.GPA))
+sprintf("The 95%% Confidence Interval for the mean combined score of students who accepted Williamson's offer to enroll is %s : %s",round(mean_enrolled_gpa_lower,digits=2),round(mean_enrolled_gpa_upper,digits=2))
+
+mean_enrolled_sat = mean(williamsonparta$SAT)
+mean_enrolled_sat_lower = mean_enrolled_sat - t95*sd(williamsonparta$SAT)/sqrt(length(williamsonparta$SAT))
+mean_enrolled_sat_upper = mean_enrolled_sat + t95*sd(williamsonparta$SAT)/sqrt(length(williamsonparta$SAT))
+sprintf("The 95%% Confidence Interval for the mean combined score of students who accepted Williamson's offer to enroll is %s : %s",round(mean_enrolled_sat_lower,digits=2),round(mean_enrolled_sat_upper,digits=2))
+
+
+williamsonpartc = williamson %>%
+  filter(Accepted.our.offer=="No")
+
+mean_notenrolled_combinedscore = mean(williamsonpartc$Combined.Score)
+mean_notenrolled_combinedscore_lower = mean_notenrolled_combinedscore - t95*sd(williamsonpartc$Combined.Score)/sqrt(length(williamsonpartc$Combined.Score))
+mean_notenrolled_combinedscore_upper = mean_notenrolled_combinedscore + t95*sd(williamsonpartc$Combined.Score)/sqrt(length(williamsonpartc$Combined.Score))
+sprintf("The 95%% Confidence Interval for the mean combined score of students who did not accept Williamson's offer to enroll is %s : %s",round(mean_notenrolled_combinedscore_lower,digits=2),round(mean_notenrolled_combinedscore_upper,digits=2))
+
+mean_notenrolled_gpa = mean(williamsonpartc$HS.GPA)
+mean_notenrolled_gpa_lower = mean_notenrolled_gpa - t95*sd(williamsonpartc$HS.GPA)/sqrt(length(williamsonpartc$HS.GPA))
+mean_notenrolled_gpa_upper = mean_notenrolled_gpa + t95*sd(williamsonpartc$HS.GPA)/sqrt(length(williamsonpartc$HS.GPA))
+sprintf("The 95%% Confidence Interval for the mean combined score of students who did not accept Williamson's offer to enroll is %s : %s",round(mean_notenrolled_gpa_lower,digits=2),round(mean_notenrolled_gpa_upper,digits=2))
+
+mean_notenrolled_sat = mean(williamsonpartc$SAT)
+mean_notenrolled_sat_lower = mean_notenrolled_sat - t95*sd(williamsonpartc$SAT)/sqrt(length(williamsonpartc$SAT))
+mean_notenrolled_sat_upper = mean_notenrolled_sat + t95*sd(williamsonpartc$SAT)/sqrt(length(williamsonpartc$SAT))
+sprintf("The 95%% Confidence Interval for the mean combined score of students who did not accept Williamson's offer to enroll is %s : %s",round(mean_notenrolled_sat_lower,digits=2),round(mean_notenrolled_sat_upper,digits=2))
+
+
+combinedscores = c(mean_enrolled_combinedscore,mean_notenrolled_combinedscore)
+gpas = c(mean_enrolled_gpa,mean_notenrolled_gpa)
+sats = c(mean_enrolled_sat,mean_notenrolled_sat)
+
+q3c = matrix(c(combinedscores,gpas,sats),nrow=3)
+q3c_df = as.data.frame(q3c)
+
+colnames(q3c_df) = c("Enrolled","Not Enrolled")
+
+diff_combinedscores = t.test(q3c_df$Enrolled,
+                             q3c_df$`Not Enrolled`,
+                             var.equal = TRUE,
+                             paired = TRUE,
+                             conf.level = 0.95)
+diff_combinedscores
+# Difference between accpeted and non accepted dfs
+
+#PartD
+
+williamsonpartdofficers = williamson %>% 
+  filter(williamson$HS.Clubs>=2)
+
+prop_officers2 = sum(williamsonpartdofficers$Accepted.our.offer=="Yes")/length(williamsonpartdofficers$HS.Clubs)
+prop_officers2_lower = prop_officers2 - qnorm(0.975)*sqrt(prop_officers2*(1-prop_officers2)/length(williamsonpartdofficers$HS.Clubs))
+prop_officers2_upper = prop_officers2 + qnorm(0.975)*sqrt(prop_officers2*(1-prop_officers2)/length(williamsonpartdofficers$HS.Clubs))
+sprintf("Proportion of students who accept Williamson's offer to enroll and have been officers at atleast 2 clubs is %s : %s",round(prop_officers2_lower,digits=2),round(prop_officers2_upper,digits=2))
+
+williamsonpartdletters = williamson %>% 
+  filter(williamson$HS.Sports>=4)
+
+prop_letters4 = sum(williamsonpartdletters$Accepted.our.offer=="Yes")/length(williamsonpartdletters$HS.Sports)
+prop_letters4_lower = prop_letters4 - qnorm(0.975)*sqrt(prop_letters4*(1-prop_letters4)/length(williamsonpartdletters$HS.Sports))
+prop_letters4_upper = prop_letters4 + qnorm(0.975)*sqrt(prop_letters4*(1-prop_letters4)/length(williamsonpartdletters$HS.Sports))
+sprintf("Proportion of students who accept Williamson's offer to enroll and have had atleast 4 letters is %s : %s",round(prop_letters4_lower,digits=2),round(prop_letters4_upper,digits=2))
+
+sprintf("We can say with 95%% confidence that Williamson is attracting students who are accomplished at sports, however it can aim to improve that number")
+
+
+#PartE
+
+fivenum(williamsonparta$HS.Size)
+fivenum(williamsonparta$HS.Percentile)
+
+med_schoolsize = median(williamsonparta$HS.Size)
+med_percentile = median(williamsonparta$HS.Percentile)
+
+#Assuming schools smaller than the median school size as "Small" and greater than or equal to median school size as "Big".
+
+williamsonparte = williamsonparta %>%
+  filter(williamsonparta$HS.Size<med_schoolsize)
+
+mean_percentile_smallschool = mean(williamsonparte$HS.Percentile)
+mean_percentile_smallschool_lower = mean_percentile_smallschool - t95*sd(williamsonparte$HS.Percentile)/sqrt(length(williamsonparte$HS.Percentile))
+mean_percentile_smallschool_upper = mean_percentile_smallschool + t95*sd(williamsonparte$HS.Percentile)/sqrt(length(williamsonparte$HS.Percentile))
+sprintf("Confidence Interval for mean percentiles of students coming from small high schools is %s : %s",round(mean_percentile_smallschool_lower,digits=2),round(mean_percentile_smallschool_upper,digits=2))
+
+williamsonparte2 = williamsonparta %>%
+  filter(williamsonparta$HS.Size>=med_schoolsize)
+
+mean_percentile_bigschool = mean(williamsonparte2$HS.Percentile)
+mean_percentile_bigschool_lower = mean_percentile_bigschool - t95*sd(williamsonparte2$HS.Percentile)/sqrt(length(williamsonparte2$HS.Percentile))
+mean_percentile_bigschool_upper = mean_percentile_bigschool + t95*sd(williamsonparte2$HS.Percentile)/sqrt(length(williamsonparte2$HS.Percentile))
+sprintf("Confidence Interval for mean percentiles of students coming from big high schools is %s : %s",round(mean_percentile_bigschool_lower,digits=2),round(mean_percentile_bigschool_upper,digits=2))
+
+sprintf("We can say with 95%% confidence that Williamson attracts academically better performing students from big high schools as compared to small high schools")
+
+```
+```{r}
+### Answer 5 ###
+
+deliverytimes = read.csv("DeliveryTimes.csv")
+#random sample of delivery times by the 4 new hires
+
+#PartA.i
+deliverytimes["Total.Times"] = deliverytimes$Prep.Time+deliverytimes$Travel.Time
+#deliverytimes
+deliverytimes["Mean.Speed"] = round(deliverytimes$Distance*60/deliverytimes$Travel.Time,digits = 2)
+#deliverytimes
+
+deliverer1 = deliverytimes %>%
+  filter(Deliverer==1)
+
+deliverer2 = deliverytimes %>%
+  filter(Deliverer==2)
+
+deliverer3 = deliverytimes %>%
+  filter(Deliverer==3)
+
+deliverer4 = deliverytimes %>%
+  filter(Deliverer==4)
+
+#deliverer1
+deliverer1_delivery_lower = mean(deliverer1$Travel.Time) - t95*sd(deliverer1$Travel.Time)/sqrt(length(deliverer1$Travel.Time))
+deliverer1_delivery_upper = mean(deliverer1$Travel.Time) + t95*sd(deliverer1$Travel.Time)/sqrt(length(deliverer1$Travel.Time))
+
+deliverer1_total_lower = mean(deliverer1$Total.Times) - t95*sd(deliverer1$Total.Times)/sqrt(length(deliverer1$Total.Times))
+deliverer1_total_upper = mean(deliverer1$Total.Times) + t95*sd(deliverer1$Total.Times)/sqrt(length(deliverer1$Total.Times))
+
+sprintf("The 95%% CI for Delivery Time of Delivery Person 1 is %s : %s minutes",round(deliverer1_delivery_lower,digits=2),round(deliverer1_delivery_upper,digits=2))
+
+sprintf("The 95%% CI for Total Time of Delivery Person 1 is %s : %s minutes",round(deliverer1_total_lower,digits=2),round(deliverer1_total_upper,digits=2))
+
+#deliverer2
+deliverer2_delivery_lower = mean(deliverer2$Travel.Time) - t95*sd(deliverer2$Travel.Time)/sqrt(length(deliverer2$Travel.Time))
+deliverer2_delivery_upper = mean(deliverer2$Travel.Time) + t95*sd(deliverer2$Travel.Time)/sqrt(length(deliverer2$Travel.Time))
+
+deliverer2_total_lower = mean(deliverer2$Total.Times) - t95*sd(deliverer2$Total.Times)/sqrt(length(deliverer2$Total.Times))
+deliverer2_total_upper = mean(deliverer2$Total.Times) + t95*sd(deliverer2$Total.Times)/sqrt(length(deliverer2$Total.Times))
+
+sprintf("The 95%% CI for Delivery Time of Delivery Person 2 is %s : %s minutes",round(deliverer2_delivery_lower,digits=2),round(deliverer2_delivery_upper,digits=2))
+
+sprintf("The 95%% CI for Total Time of Delivery Person 2 is %s : %s minutes",round(deliverer2_total_lower,digits=2),round(deliverer2_total_upper,digits=2))
+
+#deliverer3
+deliverer3_delivery_lower = mean(deliverer3$Travel.Time) - t95*sd(deliverer3$Travel.Time)/sqrt(length(deliverer3$Travel.Time))
+deliverer3_delivery_upper = mean(deliverer3$Travel.Time) + t95*sd(deliverer3$Travel.Time)/sqrt(length(deliverer3$Travel.Time))
+
+deliverer3_total_lower = mean(deliverer3$Total.Times) - t95*sd(deliverer3$Total.Times)/sqrt(length(deliverer3$Total.Times))
+deliverer3_total_upper = mean(deliverer3$Total.Times) + t95*sd(deliverer3$Total.Times)/sqrt(length(deliverer3$Total.Times))
+
+sprintf("The 95%% CI for Delivery Time of Delivery Person 3 is %s : %s minutes",round(deliverer3_delivery_lower,digits=2),round(deliverer3_delivery_upper,digits=2))
+
+sprintf("The 95%% CI for Total Time of Delivery Person 3 is %s : %s minutes",round(deliverer3_total_lower,digits=2),round(deliverer3_total_upper,digits=2))
+
+#deliverer4
+deliverer4_delivery_lower = mean(deliverer4$Travel.Time) - t95*sd(deliverer4$Travel.Time)/sqrt(length(deliverer4$Travel.Time))
+deliverer4_delivery_upper = mean(deliverer4$Travel.Time) + t95*sd(deliverer4$Travel.Time)/sqrt(length(deliverer4$Travel.Time))
+
+deliverer4_total_lower = mean(deliverer4$Total.Times) - t95*sd(deliverer4$Total.Times)/sqrt(length(deliverer4$Total.Times))
+deliverer4_total_upper = mean(deliverer4$Total.Times) + t95*sd(deliverer4$Total.Times)/sqrt(length(deliverer4$Total.Times))
+
+sprintf("The 95%% CI for Delivery Time of Delivery Person 4 is %s : %s minutes",round(deliverer4_delivery_lower,digits=2),round(deliverer4_delivery_upper,digits=2))
+
+sprintf("The 95%% CI for Total Time of Delivery Person 4 is %s : %s minutes",round(deliverer4_total_lower,digits=2),round(deliverer4_total_upper,digits=2))
+
+deliverer1times = c(round(deliverer1_delivery_lower,digits=2),round(deliverer1_delivery_upper,digits=2),round(deliverer1_total_lower,digits=2),round(deliverer1_total_upper,digits=2))
+deliverer2times = c(round(deliverer2_delivery_lower,digits=2),round(deliverer2_delivery_upper,digits=2),round(deliverer2_total_lower,digits=2),round(deliverer2_total_upper,digits=2))
+deliverer3times = c(round(deliverer3_delivery_lower,digits=2),round(deliverer3_delivery_upper,digits=2),round(deliverer3_total_lower,digits=2),round(deliverer3_total_upper,digits=2))
+deliverer4times = c(round(deliverer4_delivery_lower,digits=2),round(deliverer4_delivery_upper,digits=2),round(deliverer4_total_lower,digits=2),round(deliverer4_total_upper,digits=2))
+
+deliverytimes_matrix = matrix(c(deliverer1times,deliverer2times,deliverer3times,deliverer4times),nrow = 4,byrow = TRUE)
+
+deliverytimes_matrix_df = as.data.frame(deliverytimes_matrix)
+colnames(deliverytimes_matrix_df) = c("DeliveryTimeLower","DeliveryTimeUpper","TotalTimeLower","TotalTimeUpper")
+rownames(deliverytimes_matrix_df) = c("Deliverer 1","Deliverer 2","Deliverer 3","Deliverer 4")
+deliverytimes_matrix_df
+
+sprintf("Using a 95%% confidence level for each of the Delivery Persons we can say with 95%% confident that Delivery Person 1 has the lowest delivery times and total times whereas Delivery Persons 3 & 4 have similar, and the highest, delivery and total times. Delivery and Total times for Person 2 lie in between those of Persons 1 and 2")
+sprintf("These measure alone are insufficient to measure the efficiencies of the delivery times as each Delivery person may have different distances they are covering. The vehicles used by the delivery people may be different as well")
+
+#PartA.ii
+
+length(deliverer1$Deliverer)
+length(deliverer2$Deliverer)
+length(deliverer3$Deliverer)
+length(deliverer4$Deliverer)
+
+mean_deliverer1_speed = mean(deliverer1$Mean.Speed)
+mean_deliverer1_speed_lower = mean_deliverer1_speed - t95*sd(deliverer1$Mean.Speed)/sqrt(length(deliverer1$Mean.Speed))
+mean_deliverer1_speed_upper = mean_deliverer1_speed + t95*sd(deliverer1$Mean.Speed)/sqrt(length(deliverer1$Mean.Speed))
+sprintf("The 95%% CI for the speed of Deliverer 1 is %s : %s",round(mean_deliverer1_speed_lower,digits=2),round(mean_deliverer1_speed_upper,digits=2))
+
+mean_deliverer2_speed = mean(deliverer2$Mean.Speed)
+mean_deliverer2_speed_lower = mean_deliverer2_speed - t95*sd(deliverer2$Mean.Speed)/sqrt(length(deliverer2$Mean.Speed))
+mean_deliverer2_speed_upper = mean_deliverer2_speed + t95*sd(deliverer2$Mean.Speed)/sqrt(length(deliverer2$Mean.Speed))
+sprintf("The 95%% CI for the speed of Deliverer 1 is %s : %s",round(mean_deliverer2_speed_lower,digits=2),round(mean_deliverer2_speed_upper,digits=2))
+
+mean_deliverer3_speed = mean(deliverer3$Mean.Speed)
+mean_deliverer3_speed_lower = mean_deliverer3_speed - t95*sd(deliverer3$Mean.Speed)/sqrt(length(deliverer3$Mean.Speed))
+mean_deliverer3_speed_upper = mean_deliverer3_speed + t95*sd(deliverer3$Mean.Speed)/sqrt(length(deliverer3$Mean.Speed))
+sprintf("The 95%% CI for the speed of Deliverer 1 is %s : %s",round(mean_deliverer3_speed_lower,digits=2),round(mean_deliverer3_speed_upper,digits=2))
+
+mean_deliverer4_speed = mean(deliverer4$Mean.Speed)
+mean_deliverer4_speed_lower = mean_deliverer4_speed - t95*sd(deliverer4$Mean.Speed)/sqrt(length(deliverer4$Mean.Speed))
+mean_deliverer4_speed_upper = mean_deliverer4_speed + t95*sd(deliverer4$Mean.Speed)/sqrt(length(deliverer4$Mean.Speed))
+sprintf("The 95%% CI for the speed of Deliverer 1 is %s : %s",round(mean_deliverer4_speed_lower,digits=2),round(mean_deliverer4_speed_upper,digits=2))
+
+mean12 <- t.test(deliverer1$Mean.Speed, 
+            deliverer2$Mean.Speed, 
+            var.equal = TRUE, 
+            paired = FALSE, 
+            conf.level = 0.95)
+
+sprintf("The 95%% CI for mean difference in speed for Delivery Persons 1 and 2 is %s : %s",round(mean12$conf.int[1],digits=2),round(mean12$conf.int[2],digits=2))
+
+mean13 <- t.test(deliverer1$Mean.Speed, 
+            deliverer3$Mean.Speed, 
+            var.equal = TRUE, 
+            paired = FALSE, 
+            conf.level = 0.95)
+
+sprintf("The 95%% CI for mean difference in speed for Delivery Persons 1 and 3 is %s : %s",round(mean13$conf.int[1],digits=2),round(mean13$conf.int[2],digits=2))
+
+mean14 <- t.test(deliverer1$Mean.Speed, 
+            deliverer4$Mean.Speed, 
+            var.equal = TRUE, 
+            paired = FALSE, 
+            conf.level = 0.95)
+
+sprintf("The 95%% CI for mean difference in speed for Delivery Persons 1 and 4 is %s : %s",round(mean14$conf.int[1],digits=2),round(mean14$conf.int[2],digits=2))
+
+mean23 <- t.test(deliverer2$Mean.Speed, 
+            deliverer3$Mean.Speed, 
+            var.equal = TRUE, 
+            paired = FALSE, 
+            conf.level = 0.95)
+
+sprintf("The 95%% CI for mean difference in speed for Delivery Persons 2 and 3 is %s : %s",round(mean23$conf.int[1],digits=2),round(mean23$conf.int[2],digits=2))
+
+mean24 <- t.test(deliverer2$Mean.Speed, 
+            deliverer4$Mean.Speed, 
+            var.equal = TRUE, 
+            paired = FALSE, 
+            conf.level = 0.95)
+
+sprintf("The 95%% CI for mean difference in speed for Delivery Persons 2 and 4 is %s : %s",round(mean24$conf.int[1],digits=2),round(mean24$conf.int[2],digits=2))
+
+mean34 <- t.test(deliverer3$Mean.Speed, 
+            deliverer4$Mean.Speed, 
+            var.equal = TRUE, 
+            paired = FALSE, 
+            conf.level = 0.95)
+
+sprintf("The 95%% CI for mean difference in speed for Delivery Persons 3 and 4 is %s : %s",round(mean34$conf.int[1],digits=2),round(mean34$conf.int[2],digits=2))
+
+#Delivery person 2 fastest, Delivery person 1, Delivery Person 3, Delivery Person 4
+sprintf("We are 95%% confident that Delivery Person 2 has the highest mean speed, followed by Delivery Person 1. It is not possible to interpret who has a higher mean speed betwen Delivery Persons 3 and 4")
+
+
+#PartB.i
+
+deliverytimes_part2 = deliverytimes %>%
+  filter(Distance<10)
+
+# M = 25
+prop_under25 = round(sum(deliverytimes_part2$Total.Times<25)/length(deliverytimes_part2$Total.Times),digits=2)
+prop_under25*length(deliverytimes_part2$Total.Times)
+(1-prop_under25)*length(deliverytimes_part2$Total.Times)
+
+prop_under25_lower = prop_under25 - qnorm(0.975)*sqrt(prop_under25*(1-prop_under25)/length(deliverytimes_part2$Total.Times))
+prop_under25_upper = prop_under25 + qnorm(0.975)*sqrt(prop_under25*(1-prop_under25)/length(deliverytimes_part2$Total.Times))
+sprintf("The 95%% CI for the proportion of deliveries that will be under M = 25 Minutes is %s : %s",round(prop_under25_lower,digits=2),round(prop_under25_upper,digits=2))
+
+# M = 30
+prop_under30 = round(sum(deliverytimes_part2$Total.Times<30)/length(deliverytimes_part2$Total.Times),digits=2)
+prop_under30*length(deliverytimes_part2$Total.Times)
+(1-prop_under30)*length(deliverytimes_part2$Total.Times)
+
+prop_under30_lower = prop_under30 - qnorm(0.975)*sqrt(prop_under30*(1-prop_under30)/length(deliverytimes_part2$Total.Times))
+prop_under30_upper = prop_under30 + qnorm(0.975)*sqrt(prop_under30*(1-prop_under30)/length(deliverytimes_part2$Total.Times))
+sprintf("The 95%% CI for the proportion of deliveries that will be under M = 30 Minutes is %s : %s",round(prop_under30_lower,digits=2),round(prop_under30_upper,digits=2))
+
+# M = 35
+prop_under35 = round(sum(deliverytimes_part2$Total.Times<35)/length(deliverytimes_part2$Total.Times),digits=2)
+prop_under35*length(deliverytimes_part2$Total.Times)
+(1-prop_under35)*length(deliverytimes_part2$Total.Times)
+
+prop_under35_lower = prop_under35 - qnorm(0.975)*sqrt(prop_under35*(1-prop_under35)/length(deliverytimes_part2$Total.Times))
+prop_under35_upper = prop_under35 + qnorm(0.975)*sqrt(prop_under35*(1-prop_under35)/length(deliverytimes_part2$Total.Times))
+sprintf("The 95%% CI for the proportion of deliveries that will be under M = 35 Minutes is %s : %s",round(prop_under35_lower,digits=2),round(prop_under35_upper,digits=2))
+
+#PartB.ii
+
+sprintf("The range of dollar amt of coupons the restaurant will have to give out for M = 25 is with 95%% confidence %s : %s dollars",round((1-prop_under25_upper)*10000,digits=2),round((1-prop_under25_lower)*10000,digits=2))
+
+sprintf("The range of dollar amt of coupons the restaurant will have to give out for M = 30 is %s with 95%% confidence : %s dollars",round((1-prop_under30_upper)*10000,digits=2),round((1-prop_under30_lower)*10000,digits=2))
+
+sprintf("The range of dollar amt of coupons the restaurant will have to give out for M = 35 is %s with 95%% confidence : %s dollars",round((1-prop_under35_upper)*10000,digits=2),round((1-prop_under35_lower)*10000,digits=2))
+
+
+#PartC.i
+
+deliverytimes["Predicted.Time"] = round(deliverytimes$Distance*2.06 + 14.8) + 5
+
+#M=25
+prop_under25_predicted = round(sum(deliverytimes$Predicted.Time<25)/length(deliverytimes$Predicted.Time),digits=2)
+prop_under25_predicted*length(deliverytimes$Predicted.Time)
+(1-prop_under25_predicted)*length(deliverytimes$Predicted.Time)
+
+prop_under25_predicted_lower = prop_under25_predicted - qnorm(0.975)*sqrt(prop_under25_predicted*(1-prop_under25_predicted)/length(deliverytimes$Predicted.Time))
+prop_under25_predicted_upper = prop_under25_predicted + qnorm(0.975)*sqrt(prop_under25_predicted*(1-prop_under25_predicted)/length(deliverytimes$Predicted.Time))
+sprintf("The 95%% CI for the proportion of deliveries that will be under M = 25 Minutes, based on predictions, is %s : %s",round(prop_under25_predicted_lower,digits=2),round(prop_under25_predicted_upper,digits=2))
+
+#M=30
+prop_under30_predicted = round(sum(deliverytimes$Predicted.Time<30)/length(deliverytimes$Predicted.Time),digits=2)
+prop_under30_predicted*length(deliverytimes$Predicted.Time)
+(1-prop_under30_predicted)*length(deliverytimes$Predicted.Time)
+
+prop_under30_predicted_lower = prop_under30_predicted - qnorm(0.975)*sqrt(prop_under30_predicted*(1-prop_under30_predicted)/length(deliverytimes$Predicted.Time))
+prop_under30_predicted_upper = prop_under30_predicted + qnorm(0.975)*sqrt(prop_under30_predicted*(1-prop_under30_predicted)/length(deliverytimes$Predicted.Time))
+sprintf("The 95%% CI for the proportion of deliveries that will be under M = 30 Minutes, based on predictions, is %s : %s",round(prop_under30_predicted_lower,digits=2),round(prop_under30_predicted_upper,digits=2))
+
+#M=35
+prop_under35_predicted = round(sum(deliverytimes$Predicted.Time<35)/length(deliverytimes$Predicted.Time),digits=2)
+prop_under35_predicted*length(deliverytimes$Predicted.Time)
+(1-prop_under35_predicted)*length(deliverytimes$Predicted.Time)
+
+prop_under35_predicted_lower = prop_under35_predicted - qnorm(0.975)*sqrt(prop_under35_predicted*(1-prop_under35_predicted)/length(deliverytimes$Predicted.Time))
+prop_under35_predicted_upper = prop_under35_predicted + qnorm(0.975)*sqrt(prop_under35_predicted*(1-prop_under35_predicted)/length(deliverytimes$Predicted.Time))
+sprintf("The 95%% CI for the proportion of deliveries that will be under M = 35 Minutes, based on predictions, is %s : %s",round(prop_under35_predicted_lower,digits=2),round(prop_under35_predicted_upper,digits=2))
+
+#PartC.ii
+
+sprintf("The range of dollar amt of coupons the restaurant will have to give out for M = 25, based on predicted times, with 95%% confidence is %s : %s dollars",round((1-prop_under25_predicted_upper)*10000,digits=2),round((1-prop_under25_predicted_lower)*10000,digits=2))
+
+sprintf("The range of dollar amt of coupons the restaurant will have to give out for M = 30, based on predicted times, with 95%% confidence is %s : %s dollars",round((1-prop_under30_predicted_upper)*10000,digits=2),round((1-prop_under30_predicted_lower)*10000,digits=2))
+
+sprintf("The range of dollar amt of coupons the restaurant will have to give out for M = 35, based on predicted times, with 95%% confidence is %s : %s dollars",round((1-prop_under35_predicted_upper)*10000,digits=2),round((1-prop_under35_predicted_lower)*10000,digits=2))
+```
+
+
+```{r}
+### Answer 6 ###
+
+payment_times = read.csv("SSA.csv")
+
+#H0 : Mean amount of time to pay bills is 24 days.
+#H1 : Including a SSA will reduce mean payment time by more than 2 days and would generate profit.
+
+sprintf("Error analysis:")
+sprintf("Consequences of a Type 1 Error: The firm shifts to sending SSA Envelopes but end up facing losses")
+sprintf("Consequences of a Type 2 Error: The firm continues to use the old system and miss out on profits")
+sprintf("Based on the above consequences it is best to minimise the Type 1 Error using a significance level of 0.01.")
+
+#Performing Hypothesis Testing.
+
+t.test(payment_times$Payment,alternative="less",mu=24,conf.level = 0.99)
+
+sprintf("At 1%% significance level there is sufficient evidence to support that the plan to include SSA Envelopes will be profitable")
+```
+
+
+```{r}
+### Answer 7 ###
+
+electionresults = read.csv("Elections.csv")
+bush_votes = sum(electionresults$Votes==2)
+
+sprintf("H0: Bush_votes > Total_votes/2")
+sprintf("H1: Bush_votes <= Total_votes/2")
+
+prop.test(bush_votes,nrow(electionresults),alternative = "less",conf.level = 0.90,p=0.5)
+
+sprintf("There is not sufficient evidence to reject the claim that Bush will win the election")
+sprintf("The networks should announce that Bush will win")
+```
+
+
+```{r}
+### Answer 8 ###
+
+grocerytown = read.csv("GroceryBills.csv")
+#National average = 150
+
+#PartA
+
+#H0: Average amount spent on groceries by 4 person families in the town is equal to the national average amount spent on groceries by 4 person families
+#H1: Average amount spent on groceries by 4 person families in the town is not equal to the national average amount spent on groceries by 4 person families
+
+sprintf("H0: Avg_town_grocery = 150")
+sprintf("H1: Avg_town_grocery != 150")
+
+t.test(grocerytown$Weekly_food_expense,mu=150)
+
+sprintf("As the p-value is extremely low, the sample is statistically significant")
+
+#PartB
+
+t.test(grocerytown$Weekly_food_expense,mu=150,conf.level = 0.99)
+sprintf("We would reject the null hypothesis when the sample statistic lies between 153 and 165.6 dollars")
+
+t.test(grocerytown$Weekly_food_expense,mu=150,conf.level = 0.90)
+sprintf("We would reject the null hypothesis when the sample statistic lies between 155.4 and 163.3 dollars")
+```
+
+
+```{r}
+### Answer 9 ###
+
+demands = read.csv("Demand.csv")
+
+sprintf("H0: var_dailydemand = 250")
+sprintf("H1: var_dailydemand =! 250")
+
+library(EnvStats)
+
+varTest(demands$Demand,sigma.squared = 250)
+
+sprintf("There is insuficient evidence to warrant rejection of the null hypothesis that the operations analyst was wrong and that daily demand equals 250.")
+```
+
+
+```{r}
+### Answer 10 ###
+
+sprintf("H0: Amount_fuel = 15")
+sprintf("H1: Amount_fuel < 15")
+
+sprintf("Type 1 Error : A Type 1 Error may result in a false alarm being raised to the FAA allowing the concerned plane to land immediately but potentially shutting down the airport and diverting other flights in the midst of a storm.")
+sprintf("Type 2 Error : The consequences of a Type 2 Error may result in the plane running out of fuel mid-air before 15 minutes and crash landing")
+```
+
+
+```{r}
+### Answer 11 ###
+library("dplyr")
+analysts = read.csv("BAY.csv")
+
+#PartA.i
+analysts_3more = analysts %>%
+  filter(Stayed.3.Years=="Yes")
+
+analysts_3less = analysts %>%
+  filter(Stayed.3.Years=="No")
+
+sampsize_3more = nrow(analysts_3more)
+t95_3more <- qt(0.95, df = sampsize_3more-1, lower.tail = TRUE)
+
+sampsize_3less = nrow(analysts_3less)
+t95_3less <- qt(0.95, df = sampsize_3less-1, lower.tail = TRUE)
+
+mean_3more = mean(analysts_3more$Starting.Salary)
+mean_3less = mean(analysts_3less$Starting.Salary)
+
+s_3more = sd(analysts_3more$Starting.Salary)
+s_3less = sd(analysts_3less$Starting.Salary)
+
+#l95 <- x_bar - (t95*s/sqrt(n))
+#r95 <- x_bar + (t95*s/sqrt(n))
+
+sprintf("The confidence interval of starting salaries of people who have been at the firm for less than 3 years is %s : %s dollars",round(mean_3less-(t95_3less*s_3less/sqrt(sampsize_3less))),round(mean_3less+(t95_3less*s_3less/sqrt(sampsize_3less))))
+
+sprintf("The confidence interval of starting salaries of people who have been at the firm for more than 3 years is %s : %s dollars",round(mean_3more-(t95_3more*s_3more/sqrt(sampsize_3more))),round(mean_3more+(t95_3more*s_3more/sqrt(sampsize_3more))))
+
+mean_salary_diff <- t.test(analysts_3less$Starting.Salary, 
+                    analysts_3more$Starting.Salary, 
+                    var.equal = TRUE, 
+                    paired = FALSE, 
+                    conf.level = 0.95)
+
+sprintf("The 95%% CI for mean difference in starting salaries is %s : %s dollars",round(mean_salary_diff$conf.int[1],digits=2),round(mean_salary_diff$conf.int[2],digits=2))
+
+sprintf("We can say with 95%% confidence that people who have been at the firm for less than 3 years earn more than those who have been here for more than 3 years although the CI interval for mean difference is not high.")
+
+
+#PartA.ii
+
+analysts_lessmedian = analysts %>%
+  filter(analysts$Starting.Salary<=median(analysts$Starting.Salary))
+
+prop_atleast3 = sum(analysts_lessmedian$Stayed.3.Years=="Yes")/length(analysts_lessmedian$Stayed.3.Years)
+prop_atleast3*length(analysts_lessmedian$Stayed.3.Years)
+(1-prop_atleast3)*length(analysts_lessmedian$Stayed.3.Years)
+#conditions satisfied
+
+propatleast3_lower = prop_atleast3 - qnorm(0.975)*sqrt(prop_atleast3*(1-prop_atleast3)/length(analysts_lessmedian$Stayed.3.Years))
+propatleast3_upper = prop_atleast3 + qnorm(0.975)*sqrt(prop_atleast3*(1-prop_atleast3)/length(analysts_lessmedian$Stayed.3.Years))
+sprintf("The confidence interval for proportion of people with a starting salary less than the median who have been at the firm for over 3 years is %s : %s",round(propatleast3_lower,digits=2),round(propatleast3_upper,digits=2))
+
+analysts_moremedian = analysts %>%
+  filter(analysts$Starting.Salary>median(analysts$Starting.Salary))
+
+prop_atleast3_more = sum(analysts_moremedian$Stayed.3.Years=="Yes")/length(analysts_moremedian$Stayed.3.Years)
+prop_atleast3_more*length(analysts_moremedian$Stayed.3.Years)
+(1-prop_atleast3_more)*length(analysts_moremedian$Stayed.3.Years)
+#conditions satisfied
+
+propatleast3_more_lower = prop_atleast3_more - qnorm(0.975)*sqrt(prop_atleast3_more*(1-prop_atleast3_more)/length(analysts_moremedian$Stayed.3.Years))
+propatleast3_more_upper = prop_atleast3_more + qnorm(0.975)*sqrt(prop_atleast3_more*(1-prop_atleast3_more)/length(analysts_moremedian$Stayed.3.Years))
+sprintf("The confidence interval for proportion of people with a starting salary more than the median who have been at the firm for over 3 years is %s : %s",round(propatleast3_more_lower,digits=2),round(propatleast3_more_upper,digits=2))
+
+diff_prop_medsalary = prop.test(c(sum(analysts_lessmedian$Stayed.3.Years=="Yes"),sum(analysts_moremedian$Stayed.3.Years=="Yes")),
+            c(length(analysts_lessmedian$Stayed.3.Years),length(analysts_moremedian$Stayed.3.Years)),
+            alternative = "two.sided", 
+            conf.level = 0.95, correct = FALSE)
+
+sprintf("The 95%% CI for difference in proportions is %s : %s", round(diff_prop_medsalary$conf.int[1],digits=2),round(diff_prop_medsalary$conf.int[2],digits=2))
+
+#PartB.i
+
+analysts$On.Road.Pct<-gsub("%","",as.character(analysts$On.Road.Pct))
+analysts$On.Road.Pct = as.numeric(analysts$On.Road.Pct)
+
+analysts_3more = analysts %>%
+  filter(Stayed.3.Years=="Yes")
+
+analysts_3less = analysts %>%
+  filter(Stayed.3.Years=="No")
+
+sampsize_3more = nrow(analysts_3more)
+t95_3more <- qt(0.95, df = sampsize_3more-1, lower.tail = TRUE)
+
+sampsize_3less = nrow(analysts_3less)
+t95_3less <- qt(0.95, df = sampsize_3less-1, lower.tail = TRUE)
+
+mean_3more_road = mean(analysts_3more$On.Road.Pct)
+mean_3less_road = mean(analysts_3less$On.Road.Pct)
+
+s_3more_road = sd(analysts_3more$On.Road.Pct)
+s_3less_road = sd(analysts_3less$On.Road.Pct)
+
+sprintf("The confidence interval of percent of time spent on road by people who have been at the firm for less than 3 years is %s : %s dollars",round(mean_3less_road-(t95_3less*s_3less_road/sqrt(sampsize_3less))),round(mean_3less_road+(t95_3less*s_3less_road/sqrt(sampsize_3less))))
+
+sprintf("The confidence interval of percent of time spent on road by people who have been at the firm for more than 3 years is %s : %s dollars",round(mean_3more_road-(t95_3more*s_3more_road/sqrt(sampsize_3more))),round(mean_3more_road+(t95_3more*s_3more_road/sqrt(sampsize_3more))))
+
+mean_road_diff <- t.test(analysts_3less$On.Road.Pct, 
+                    analysts_3more$On.Road.Pct, 
+                    var.equal = TRUE, 
+                    paired = FALSE, 
+                    conf.level = 0.95)
+
+sprintf("The 95%% CI for mean difference in percentage of time spent on road between analysts who have been at the firm for less than 3 years and analysts who have been at the firm for more than three years is %s : %s",round(mean_road_diff$conf.int[1],digits=2),round(mean_salary_diff$conf.int[2],digits=2))
+
+sprintf("We can say with 95%% confidence that people who have been at the firm for less than 3 years have spent a larger proportion of their time on the road than those who have been here for more than 3 years.")
+
+#PartB.ii
+
+analysts_lessmedian_road = analysts %>%
+  filter(analysts$On.Road.Pct<=median(analysts$On.Road.Pct))
+
+prop_atleast3_road = sum(analysts_lessmedian_road$Stayed.3.Years=="Yes")/length(analysts_lessmedian_road$Stayed.3.Years)
+prop_atleast3_road*length(analysts_lessmedian_road$Stayed.3.Years)
+(1-prop_atleast3_road)*length(analysts_lessmedian_road$Stayed.3.Years)
+#conditions satisfied
+
+propatleast3_road_lower = prop_atleast3_road - qnorm(0.975)*sqrt(prop_atleast3_road*(1-prop_atleast3_road)/length(analysts_lessmedian_road$Stayed.3.Years))
+propatleast3_road_upper = prop_atleast3_road + qnorm(0.975)*sqrt(prop_atleast3_road*(1-prop_atleast3_road)/length(analysts_lessmedian_road$Stayed.3.Years))
+sprintf("The confidence interval for proportion of people who have spent less time on the road than the median and who have been at the firm for over 3 years is %s : %s",round(propatleast3_road_lower,digits=2),round(propatleast3_road_upper,digits=2))
+
+analysts_moremedian_road = analysts %>%
+  filter(analysts$On.Road.Pct>median(analysts$On.Road.Pct))
+
+prop_atleast3_more_road = sum(analysts_moremedian_road$Stayed.3.Years=="Yes")/length(analysts_moremedian_road$Stayed.3.Years)
+prop_atleast3_more_road*length(analysts_moremedian_road$Stayed.3.Years)
+(1-prop_atleast3_more_road)*length(analysts_moremedian_road$Stayed.3.Years)
+#conditions satisfied
+
+propatleast3_more_road_lower = prop_atleast3_more_road - qnorm(0.975)*sqrt(prop_atleast3_more_road*(1-prop_atleast3_more_road)/length(analysts_moremedian_road$Stayed.3.Years))
+propatleast3_more_road_upper = prop_atleast3_more_road + qnorm(0.975)*sqrt(prop_atleast3_more_road*(1-prop_atleast3_more_road)/length(analysts_moremedian_road$Stayed.3.Years))
+sprintf("The confidence interval for proportion of people who have spent more time on the road than the median and who have been at the firm for over 3 years is %s : %s",round(propatleast3_more_road_lower,digits=2),round(propatleast3_more_road_upper,digits=2))
+
+diff_prop_road = prop.test(c(sum(analysts_lessmedian_road$Stayed.3.Years=="Yes"),sum(analysts_moremedian_road$Stayed.3.Years=="Yes")),
+            c(length(analysts_lessmedian_road$Stayed.3.Years),length(analysts_moremedian_road$Stayed.3.Years)),
+            alternative = "two.sided", 
+            conf.level = 0.95, correct = FALSE)
+
+sprintf("The 95%% CI for difference in proportions is %s : %s", round(diff_prop_road$conf.int[1],digits=2),round(diff_prop_medsalary$conf.int[2],digits=2))
+
+sprintf("We can say with 95%% confidence that people who have spent more than the median percentage of their time at the firm on the road are less likely to stay at the firm for more than 3 years")
+
+
+#PartC
+
+sampsize_3less = nrow(analysts_3less)
+t95_3less <- qt(0.95, df = sampsize_3less-1, lower.tail = TRUE)
+
+mean_3less_tenure = mean(analysts_3less$Tenure)
+s_3less_tenure = sd(analysts_3less$Tenure)
+
+sprintf("The confidence interval of Tenure of people who have been at the firm for less than 3 years is %s : %s months",round(mean_3less_tenure-(t95_3less*s_3less_tenure/sqrt(sampsize_3less))),round(mean_3less_tenure+(t95_3less*s_3less_tenure/sqrt(sampsize_3less))))
+
+sprintf("The Tenure values for people who stay at the firm for over 3 years are NA")
+
+#PartD
+
+prop_3more_state = sum(analysts_3more$State.Univ=="Yes")/length(analysts_3more$State.Univ)
+prop_3more_state*length(analysts_3more$State.Univ)
+(1-prop_3more_state)*length(analysts_3more$State.Univ)
+
+prop_3more_state_lower = prop_3more_state - qnorm(0.975)*sqrt(prop_3more_state*(1-prop_3more_state)/length(analysts_3more$State.Univ))
+prop_3more_state_upper = prop_3more_state + qnorm(0.975)*sqrt(prop_3more_state*(1-prop_3more_state)/length(analysts_3more$State.Univ))
+
+sprintf("The 95%% CI for proportion of people who have been at the firm for over 3 years and attended State University is %s : %s",round(prop_3more_state_lower,digits=2),round(prop_3more_state_upper,digits=2))
+
+prop_3more_nostate = sum(analysts_3more$State.Univ=="No")/length(analysts_3more$State.Univ)
+prop_3more_nostate*length(analysts_3more$State.Univ)
+(1-prop_3more_nostate)*length(analysts_3more$State.Univ)
+
+prop_3more_nostate_lower = prop_3more_nostate - qnorm(0.975)*sqrt(prop_3more_nostate*(1-prop_3more_nostate)/length(analysts_3more$State.Univ))
+prop_3more_nostate_upper = prop_3more_nostate + qnorm(0.975)*sqrt(prop_3more_nostate*(1-prop_3more_nostate)/length(analysts_3more$State.Univ))
+
+sprintf("The 95%% CI for proportion of people who have been at the firm for over 3 years and did not attend State University is %s : %s",round(prop_3more_nostate_lower,digits=2),round(prop_3more_nostate_upper,digits=2))
+
+
+prop_3more_cis = sum(analysts_3more$CIS.Degree=="Yes")/length(analysts_3more$CIS.Degree)
+prop_3more_cis*length(analysts_3more$CIS.Degree)
+(1-prop_3more_cis)*length(analysts_3more$CIS.Degree)
+
+prop_3more_cis_lower = prop_3more_cis - qnorm(0.975)*sqrt(prop_3more_cis*(1-prop_3more_cis)/length(analysts_3more$CIS.Degree))
+prop_3more_cis_upper = prop_3more_cis + qnorm(0.975)*sqrt(prop_3more_cis*(1-prop_3more_cis)/length(analysts_3more$CIS.Degree))
+
+sprintf("The 95%% CI for proportion of people who have been at the firm for over 3 years and have a CIS degree is %s : %s",round(prop_3more_cis_lower,digits=2),round(prop_3more_cis_upper,digits=2))
+
+prop_3more_nocis = sum(analysts_3more$CIS.Degree=="No")/length(analysts_3more$CIS.Degree)
+prop_3more_nocis*length(analysts_3more$CIS.Degree)
+(1-prop_3more_nocis)*length(analysts_3more$CIS.Degree)
+
+prop_3more_nocis_lower = prop_3more_nocis - qnorm(0.975)*sqrt(prop_3more_nocis*(1-prop_3more_nocis)/length(analysts_3more$CIS.Degree))
+prop_3more_nocis_upper = prop_3more_nocis + qnorm(0.975)*sqrt(prop_3more_nocis*(1-prop_3more_nocis)/length(analysts_3more$CIS.Degree))
+
+sprintf("The 95%% CI for proportion of people who have been at the firm for over 3 years and do not have a CIS degree is %s : %s",round(prop_3more_nocis_lower,digits=2),round(prop_3more_nocis_upper,digits=2))
+
+sprintf("We can say with 95%% confidence that people who do not have a State Degree are more likely to stay at the firm for more than 3 years")
+sprintf("We can say with 95%% confidence that people who have a CIS Degree are more likely to stay at the firm for more than 3 years")
+
+```
+
+
+```{r}
+
+### Answer 12 ###
+
+power.prop.test(n=50,sig.level = 0.1,power = NULL,alternative = "one.sided",p1=0.50,p2=0.60)
+pwr.p.test(h=ES.h(0.6,0.5),n=50,sig.level=0.1,power=NULL,alternative="greater")
+sprintf("The power of the test is 39%%")
+
+power.prop.test(n=NULL,sig.level = 0.1,power = 0.80,alternative = "one.sided",p1=0.50,p2=0.60)
+
+sprintf("The sample size required would be 222")
+
+```
+

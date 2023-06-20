@@ -1,0 +1,264 @@
+---
+title: "HW4"
+author: "Rahul Rajput"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+### ANSWER 1 ###
+
+irs = read.csv("IRS 1.csv")
+irs_stacked = stack(irs)
+names(irs_stacked) = c("time","form")
+
+# 5% significance level
+
+Times = irs_stacked$time
+Form = irs_stacked$form
+
+model_q1 = lm(Times~Form)
+residuals_q1 = residuals(model_q1)
+predict_q1 = predict(model_q1)
+
+#PartA - Checking for Normality using Anderson-Darling test
+nortest::ad.test(residuals_q1)
+sprintf("Since the p-value is not significant, the data normality condition is satisfied.")
+
+#Checking visually
+qqnorm(residuals_q1)
+qqline(residuals_q1)
+
+#PartB - Checking if the variances are equal
+bartlett.test(Times~Form)
+sprintf("Since the p-value is not significant, the equal variances condition is satisfied.")
+#Checking visually
+plot(predict_q1,residuals_q1)
+
+#PartC - Running One Way ANOVA
+ANOVA_q1 = aov(Times~Form)
+summary(ANOVA_q1)
+
+sprintf("As the p-value is less than the chose significance level we can say with 95%% confidence that differences exist between the forms.")
+
+#PartD - Running Tukey's test
+
+#H0 :μ1 =μ2 =μ3 =μ4
+#H1 : At least one mean is different.
+
+TukeyHSD(ANOVA_q1)
+plot(TukeyHSD(ANOVA_q1))
+
+sprintf("Using Tukey's HSD test we find that Forms 1 and 4 are different and we can reject the Null Hypothesis.")
+```
+```{r}
+### ANSWER 2 ###
+
+irs2 = read.csv("IRS 2.csv")
+irs2
+library("tidyr")
+
+stacked_irs2=stack(irs2[c("Form.1","Form.2","Form.3","Form.4")])
+stacked_irs2$Taxpayer=irs2$Taxpayer
+
+names(stacked_irs2) = c("Times","Form","Taxpayer")
+stacked_irs2$Taxpayer = factor(stacked_irs2$Taxpayer)
+#stacked_irs2
+
+Times2 = stacked_irs2$Times
+Form2 = stacked_irs2$Form
+Taxpayer2 = stacked_irs2$Taxpayer
+
+model_q2 = lm(Times2~Form2+Taxpayer2)
+residuals_q2 = residuals(model_q2)
+
+#PartA - Checking for normality using Anderson-Darling Test
+nortest::ad.test(residuals_q2)
+sprintf("As the p-value is highly significant the Data is not normal")
+
+qqnorm(residuals_q2)
+qqline(residuals_q2)
+
+#PartB - Checking for constant variance condition
+plot(fitted(model_q2),residuals_q2)
+
+bartlett.test(Times2~Form2)
+bartlett.test(Times2~Taxpayer2)
+
+library("car")
+car::leveneTest(Times2~Form2)
+
+sprintf("The constant variance conditions are satisfied based on the plot of residuals vs fitted model")
+
+#PartC - Running RBD ANOVA
+
+#H0 :μ1 =μ2 =μ3 =μ4
+#H1 : At least one mean is different.
+
+ANOVA_q2 = aov(Times2~Form2+Taxpayer2)
+summary(ANOVA_q2)
+
+sprintf("The p-value for Forms is highly significant and we can say with 95%% confidence that the Forms are different and reject the Null Hypothesis.")
+
+#PartD
+sprintf("The experiment design chosen was suitable as there was significant difference between the blocks which would have otherwise led to increased error in results if the experiment had been a CRD experiment.")
+
+#PartE
+TukeyHSD(ANOVA_q2,which = "Form2")
+sprintf("All forms are different from each other except Forms 1 and 2.")
+
+TukeyHSD(ANOVA_q2,which = "Taxpayer2")
+sprintf("Many blocking pairs show significant difference.")
+
+#PartF
+sprintf("Using the RBD experiental design we find that except for Forms 1 and 2, all other forms are different whereas usiung the CRD experimental design we only found significant difference between Forms 1 and 4. This is because creating blocks allowed us to reduce the Standard Error and get clearer results.")
+
+#PartG
+sprintf("The SSE value in Q1 was 111480 compared to 5764 in Q2. The SSE in Q2 was lower as we reduced the error by introducing blocking.")
+
+```
+
+
+```{r}
+```
+```{r}
+
+### ANSWER 3 ###
+
+#PartA
+sprintf("There are 2 Factors - Forms and Income Bracket")
+
+#PartB
+sprintf("Income Bracket - Low Income, Next Income Bracket, Highest Bracket")
+sprintf("Forms - Form 1, Form 2, Form 3, Form 4")
+
+#PartC
+sprintf("There are 12 treatments in total.")
+
+#PartD
+irs3 = read.csv("IRS 3.csv")
+irs3$Group = factor(irs3$Group)
+irs3
+irs3_stacked = stack(irs3[c("Form.1","Form.2","Form.3","Form.4")])
+irs3_stacked$Group=irs3$Group
+
+names(irs3_stacked) = c("Times","Forms","IncomeGroups")
+#irs3_stacked
+
+Times_3 = irs3_stacked$Times
+Forms_3 = irs3_stacked$Forms
+IG_3 = irs3_stacked$IncomeGroups
+
+model_q3 = lm(Times_3~Forms_3*IG_3)
+residuals_q3 = residuals(model_q3)
+
+#Checking for Normality
+nortest::ad.test(residuals_q3)
+sprintf("The data is normally distributed")
+qqnorm(residuals_q3)
+qqline(residuals_q3)
+
+#Checking for Constant Variance
+bartlett.test(Times_3~Forms_3)
+bartlett.test(Times_3~IG_3)
+plot(fitted(model_q3),residuals_q3)
+sprintf("The data has constant variance for both factors")
+
+#Running Two Factor ANOVA
+ANOVA_q3 = aov(Times_3~Forms_3+IG_3+Forms_3*IG_3)
+summary(ANOVA_q3)
+
+interaction.plot(Forms_3,IG_3,Times_3)
+interaction.plot(IG_3,Forms_3,Times_3)
+
+#H0 :Income Level and Type of Form do not interact to  affect filling time
+#H1 :Income Level and Type of Form interact to  affect filling time
+
+sprintf("As the p-value is larger than the significance level we fail to reject the null hypothesis that the factors do not interact to affect the filling time.")
+
+sprintf("From the interaction plots it is clear that Income Group 3 has a higher mean form filling time for Forms 1,2 and 4. Only in Form 3 Income Group 2 has a higher mean time than Income Group 3. Income Group 1 consistently takes the least aount of time to fill the form.")
+
+#PartE
+#H0 :μ1 =μ2 =μ3 =μ4
+#H1 : At least one mean is different.
+
+sprintf("At the 95%% significance level we fail to reject the Null Hypothesis that the Forms are different")
+
+#PartF
+#H0 :μ1 =μ2 =μ3 =μ4
+#H1 : At least one mean is different.
+
+sprintf("At the 95%% significance level we reject the Null Hypothesis that the different Income Level Groups are have the sanme mean time of filling the form.")
+```
+```{r}
+
+### ANSWER 4 ###
+
+detergents = read.csv("Detergents.csv")
+detergents$Temperature = factor(detergents$Temperature)
+
+detergents_stacked = stack(detergents[c("Detergent1","Detergent2","Detergent3","Detergent4","Detergent5")])
+detergents_stacked$Temp = detergents$Temperature
+#detergents_stacked
+names(detergents_stacked) = c("Score","Detergent","Temp")
+
+#PartA
+sprintf("There are two factors - Detergent Brand and Temperatures")
+
+#PartB
+sprintf("Levels for Detergent Brands: Detergent 1, Detergent 2, Detergent 3, Detergent 4, Detergent 5")
+sprintf("Levels for Temperature: Hot Water, Warm Water, Cold Water")
+
+#PartC
+sprintf("There are 15 treatments")
+
+#PartD
+
+Score = detergents_stacked$Score
+Detergent = detergents_stacked$Detergent
+Temps = detergents_stacked$Temp
+
+model_q4 = lm(Score~Detergent*Temps)
+residuals_q4 = residuals(model_q4)
+plot(fitted(model_q4),residuals_q4)
+
+qqnorm(residuals_q4)
+qqline(residuals_q4)
+
+ANOVA_q4 = aov(Score~Detergent+Temps+Detergent*Temps)
+summary(ANOVA_q4)
+
+interaction.plot(Detergent,Temps,Score)
+interaction.plot(Temps,Detergent,Score)
+
+sprintf("At the 95%% significance level we can say that there is interaction between the Detergent Brand and Temperature of water.")
+sprintf("Based on the interaction plots it is clear that Detergents have different performances based on the temperature of the water and it is hard to conclude that any one detergent is better than the other")
+
+#PartE
+sprintf("We do not need to conduct the tests for the main effects as the interaction effect here is quite significant.")
+
+```
+
