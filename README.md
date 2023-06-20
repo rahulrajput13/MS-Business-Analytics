@@ -1,2 +1,2 @@
-# MS-Business-Analytics
-Code written as part of my Masters Program
+# MS-Business-Analytics-Basic-Statistics-Summer
+Code as part of Summer quarter
